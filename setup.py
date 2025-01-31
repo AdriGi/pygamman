@@ -10,12 +10,13 @@ from distutils.command.build import build
 from subprocess import call
 # get some sys info
 from sys import version
-from numpy.distutils.core import setup, Extension
+from numpy.distutils.core import Extension
+from numpy.distutils.core import setup
 #try:
 #    from setuptools import setup
 #except ImportError:
 #    from distutils.core import setup
-
+#import numpy.f2py as f2py
 
 DESCRIPTION = "Python wrapper for preTEOS-10 neutral density"
 LONG_DESCRIPTION = open('README.md').read()
@@ -29,36 +30,33 @@ DOWNLOAD_URL = 'http://github.com/guidov/pygamman'
 LICENSE = 'BSD 3-clause'
 VERSION = '0.1'
 INSTALL_REQ = ['numpy']
-wrapper = Extension('gamman',
-       sources=['pygamman/fortran/gamman.pyf','pygamman/fortran/gamman.f'],
-       extra_f77_compile_args=["-ffixed-line-length-132"])
+wrapper = Extension('gamman',sources=['pygamman/fortran/gamman.pyf','pygamman/fortran/gamman.f'],extra_f77_compile_args=["-ffixed-line-length-132"])
 
 # Build fortran program to create fortran unformatted ocn data (in fortran/ocndata)
-BASEPATH = os.path.dirname(os.path.abspath(__file__))
+BASEPATH = os.path.dirname(os.path.abspath('__file__'))
 GENUNF_PATH = os.path.join(BASEPATH, 'pygamman/fortrandata')
 
 class build_genunf(build):
     def run(self):
         # run original build code
         build.run(self)
-
         # build 
-        print 'running Makefile (in fortran/data)'
-
+        print ('running Makefile (in fortran/data)')    
         build_path = os.path.abspath(self.build_temp)
-	def clean():
-	    cmd=['make']
-            options = ['clean']
-            cmd.extend(options)
-	    call(cmd, cwd=GENUNF_PATH)
+
+    def clean():
+        cmd=['make']
+        options = ['clean']
+        cmd.extend(options)
+        call(cmd, cwd=GENUNF_PATH)
         self.execute(clean, [], 'make clean')
 
-	def make():
-	    call(['make'], cwd=GENUNF_PATH)
+    def make():
+        call(['make'], cwd=GENUNF_PATH)
         self.execute(make, [], 'make genunformatted')
 
-	def rungenunf():
-	    call(['./genunformatted'], cwd=GENUNF_PATH)
+    def rungenunf():
+        call(['./genunformatted'], cwd=GENUNF_PATH)
         self.execute(rungenunf, [], 'run genunformatted')
 
 
@@ -87,13 +85,12 @@ arch = platform.uname()[4]
 eggext = ".egg-info"
 pkg_name = "-".join([NAME, VERSION])
 egg_name = pkg_name+eggext
-print "Egg name:",egg_name
+print ("Egg name:",egg_name)
 
 #ocndataprefix=site.getsitepackages()[0]+"/"+egg_name+"/ocndata/"
 ocndataprefix=site.getsitepackages()[0]+"/pygamman/ocndata"
 shutil.copy2('pygamman/fortran/gamman_nodata.f', 'pygamman/fortran/gamman.f')
 replaceAll("pygamman/fortran/gamman.f","OCNDATAPATH",str(ocndataprefix))
-
 
 setup(name=NAME,
       version=VERSION,
@@ -108,7 +105,7 @@ setup(name=NAME,
       license=LICENSE,
       packages=['pygamman'],
       package_dir={'pygamman':'pygamman','pygamman/ocndata':'pygamman'},
-     data_files=[('pygamman/ocndata',['pygamman/fortrandata/llp.fdt','pygamman/fortrandata/stga.fdt']),('pygamman',[BASEPATH+'/gamman.so'])],
+      data_files=[('pygamman/ocndata',['pygamman/fortrandata/llp.fdt','pygamman/fortrandata/stga.fdt']),('pygamman',[BASEPATH+'/gamman.so'])],
       ext_modules = [wrapper],
       cmdclass={'build':build_genunf,'install':install},
       classifiers=[
@@ -119,4 +116,3 @@ setup(name=NAME,
         'Natural Language :: English',
         'Programming Language :: Python :: >2.6']
       )
-
