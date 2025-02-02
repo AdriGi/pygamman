@@ -27,7 +27,7 @@ If you are using Debian: **sudo apt-get install gfortran**
 **NOTE**
 
 In case you are using guidov version install in python 2.7, however, my suggestion is to try to install in python 3.7 building a environment using this command:  
-**create --name myenv python=3.7**
+**conda create --name myenv python=3.7**
 
 After you create the new environment, active using **conda activate myenv** and you need to install numpy in this version **conda install -y numpy=1.9.3**. 
 
